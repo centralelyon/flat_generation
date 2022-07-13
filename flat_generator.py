@@ -129,7 +129,7 @@ def checkRun(run_link, res, previous_data, flat_old):
                         if demi_tour_impossible(eventX):
                             video_dic["incoherent_turn"] = True
                         last_annotation = np.array(dt['frameId']).max() / video_dic["videoFrameRate"]
-                        time = run_json['temps'][f"temps{swimId + 1}"]
+                        time = run_json['temps']["temps" + str(swimId + 1)]
                         if time != "ATAbsence de temps" and time != None:
                             stop_time = timestr2float(time)
                             video_dic["completeness"] += (stop_time - last_annotation) / stop_time
