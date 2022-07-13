@@ -16,8 +16,9 @@ path_theo = "/home/liris/vizvid_data/files/admin/files/pipeline-tracking/"
 path_romain = "/Users/rvuillem/Desktop/dataroom/pipeline-tracking/"
 path_romain_small = "/Users/rvuillem/Desktop/pipeline-tracking-small/"
 path_clement = "./pipeline/"
+path_dataroom = "/home/liris/vizvid_data/files/admin/files/"
 
-path = path_clement
+path = path_dataroom
 
 
 def dicotiser(f):
