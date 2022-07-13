@@ -166,9 +166,12 @@ def main():
         flat_old = []
     for compet in competitions:
         if compet[0:2] == "20":  # eclude non competition folders
-            runs = next(os.walk(path + compet))[1]
-            for run in runs:
-                checkRun(path + compet + "/" + run, res, previous_data, flat_old)
+            try:
+                runs = next(os.walk(path + compet))[1]
+                for run in runs:
+                    checkRun(path + compet + "/" + run, res, previous_data, flat_old)
+            except StopIteration:
+                pass
     return res
 
 
