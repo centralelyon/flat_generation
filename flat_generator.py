@@ -80,27 +80,27 @@ def checkRun(run_link, res, previous_data, flat_old):
 
                 # video data ( ffmpeg.probe)
                 print(file)
-                if file[0:2] != "._":
+                if file[0:2] == "._":
+                    continue
 
-                    try:
-                        probe = ffmpeg.probe(run_link + '/' + file)
-                        video_dic["fileSize"] = probe['format']['size']
+                try:
+                    probe = ffmpeg.probe(run_link + '/' + file)
+                    video_dic["fileSize"] = probe['format']['size']
 
-                # video stream data
-                        for stream in probe['streams']:  # find video stream
-                            if stream['codec_type'] == 'video':
-                                video_stream = stream
-                                break
-                        video_dic['duration'] = float(video_stream['duration'])
-                        video_dic["videoWidth"] = int(video_stream['width'])
-                        video_dic["videoHeight"] = int(video_stream['height'])
-                        video_dic["videoAspectRatio"] = float(video_dic["videoWidth"] / video_dic["videoHeight"])
-                        video_dic["videoCodec"] = video_stream['codec_tag_string']
-                        video_dic["videoFrameRate"] = int(video_stream['r_frame_rate'].split('/')[0])
-                        video_dic["videoFrameCount"] = int(video_stream['nb_frames'])
-
-                    except:
-                        pass
+                    # video stream data
+                    for stream in probe['streams']:  # find video stream
+                        if stream['codec_type'] == 'video':
+                            video_stream = stream
+                            break
+                    video_dic['duration'] = float(video_stream['duration'])
+                    video_dic["videoWidth"] = int(video_stream['width'])
+                    video_dic["videoHeight"] = int(video_stream['height'])
+                    video_dic["videoAspectRatio"] = float(video_dic["videoWidth"] / video_dic["videoHeight"])
+                    video_dic["videoCodec"] = video_stream['codec_tag_string']
+                    video_dic["videoFrameRate"] = int(video_stream['r_frame_rate'].split('/')[0])
+                    video_dic["videoFrameCount"] = int(video_stream['nb_frames'])
+                except:
+                    pass
 
                 # json data
                 if common_data["json"]:
@@ -126,7 +126,7 @@ def checkRun(run_link, res, previous_data, flat_old):
                     run_annotation = pd.read_csv(run_link + '/' + run_name + '_Espadon.csv')
 
                 video_dic["completeness"] = 0.0
-                if thereisdata:
+                if thereisdata and "videoFrameRate" in video_dic:
                     swimmerId = list(run_annotation['swimmerId'].unique())
                     c = 0
                     video_dic['time_available'] = False
@@ -135,9 +135,10 @@ def checkRun(run_link, res, previous_data, flat_old):
                         eventX = np.array(dt['eventX'])
                         if demi_tour_impossible(eventX):
                             video_dic["incoherent_turn"] = True
+
                         last_annotation = np.array(dt['frameId']).max() / video_dic["videoFrameRate"]
                         time = run_json['temps']["temps" + str(swimId + 1)]
-                        if time != "ATAbsence de temps" and time != None and time !="":
+                        if time != "ATAbsence de temps" and time != None and time != "":
                             stop_time = timestr2float(time)
                             video_dic["completeness"] += (stop_time - last_annotation) / stop_time
                             c += 1
@@ -176,8 +177,8 @@ def main():
         flat_old = []
     for compet in competitions:
         if compet[0:2] == "20":  # eclude non competition folders
-            print("making compet: ",compet)
-            
+            print("making compet: ", compet)
+
             try:
                 runs = next(os.walk(path + compet))[1]
                 for run in runs:
