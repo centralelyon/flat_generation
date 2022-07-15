@@ -18,7 +18,7 @@ path_romain_small = "/Users/rvuillem/Desktop/pipeline-tracking-small/"
 path_clement = "./pipeline/"
 path_dataroom = "/home/liris/vizvid_data/files/admin/files/pipeline_tracking/"
 
-path = path_dataroom
+path = path_theo
 
 
 def dicotiser(f):
@@ -79,21 +79,28 @@ def checkRun(run_link, res, previous_data, flat_old):
                 video_dic["type_video"] = file.split('.')[0].split('_')[-1]
 
                 # video data ( ffmpeg.probe)
-                probe = ffmpeg.probe(run_link + '/' + file)
-                video_dic["fileSize"] = probe['format']['size']
+                print(file)
+                if file[0:2] != "._":
+
+                    try:
+                        probe = ffmpeg.probe(run_link + '/' + file)
+                        video_dic["fileSize"] = probe['format']['size']
 
                 # video stream data
-                for stream in probe['streams']:  # find video stream
-                    if stream['codec_type'] == 'video':
-                        video_stream = stream
-                        break
-                video_dic['duration'] = float(video_stream['duration'])
-                video_dic["videoWidth"] = int(video_stream['width'])
-                video_dic["videoHeight"] = int(video_stream['height'])
-                video_dic["videoAspectRatio"] = float(video_dic["videoWidth"] / video_dic["videoHeight"])
-                video_dic["videoCodec"] = video_stream['codec_tag_string']
-                video_dic["videoFrameRate"] = int(video_stream['r_frame_rate'].split('/')[0])
-                video_dic["videoFrameCount"] = int(video_stream['nb_frames'])
+                        for stream in probe['streams']:  # find video stream
+                            if stream['codec_type'] == 'video':
+                                video_stream = stream
+                                break
+                        video_dic['duration'] = float(video_stream['duration'])
+                        video_dic["videoWidth"] = int(video_stream['width'])
+                        video_dic["videoHeight"] = int(video_stream['height'])
+                        video_dic["videoAspectRatio"] = float(video_dic["videoWidth"] / video_dic["videoHeight"])
+                        video_dic["videoCodec"] = video_stream['codec_tag_string']
+                        video_dic["videoFrameRate"] = int(video_stream['r_frame_rate'].split('/')[0])
+                        video_dic["videoFrameCount"] = int(video_stream['nb_frames'])
+
+                    except:
+                        pass
 
                 # json data
                 if common_data["json"]:
@@ -130,7 +137,7 @@ def checkRun(run_link, res, previous_data, flat_old):
                             video_dic["incoherent_turn"] = True
                         last_annotation = np.array(dt['frameId']).max() / video_dic["videoFrameRate"]
                         time = run_json['temps']["temps" + str(swimId + 1)]
-                        if time != "ATAbsence de temps" and time != None:
+                        if time != "ATAbsence de temps" and time != None and time !="":
                             stop_time = timestr2float(time)
                             video_dic["completeness"] += (stop_time - last_annotation) / stop_time
                             c += 1
@@ -156,7 +163,10 @@ def checkRun(run_link, res, previous_data, flat_old):
 
 
 def main():
-    competitions = next(os.walk(path))[1]
+    try:
+        competitions = next(os.walk(path))[1]
+    except StopIteration:
+        pass
     res = []
     previous_data = False
     if "Flat.json" in os.listdir(path):
@@ -166,9 +176,12 @@ def main():
         flat_old = []
     for compet in competitions:
         if compet[0:2] == "20":  # eclude non competition folders
+            print("making compet: ",compet)
+            
             try:
                 runs = next(os.walk(path + compet))[1]
                 for run in runs:
+                    print(run)
                     checkRun(path + compet + "/" + run, res, previous_data, flat_old)
             except StopIteration:
                 pass
