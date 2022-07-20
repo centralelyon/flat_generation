@@ -137,7 +137,7 @@ def checkRun(run_link, res, previous_data, flat_old):
                             video_dic["incoherent_turn"] = True
 
                         last_annotation = np.array(dt['frameId']).max() / video_dic["videoFrameRate"]
-                        if "temps" in run_json['temps']:
+                        if "temps" in run_json:
                             time = run_json['temps']["temps" + str(swimId + 1)]
                         else:
                             time = ""
